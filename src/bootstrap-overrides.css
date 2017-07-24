@@ -1,0 +1,15 @@
+.navbar-brand {
+  padding: 2px 0 2px 15px;
+}
+
+.navbar-brand img {
+  display: inline-block;
+}
+
+.navbar-brand .navbar-text {
+  float: right;
+}
+
+.navbar-text {
+  display: inline-block;
+}
