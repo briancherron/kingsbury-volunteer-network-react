@@ -45,11 +45,13 @@ export default class CategorySelection extends Component {
   }
 
   handleCategoryAdd(e) {
-    this.props.handleCategoryAdd({
-      id: Number(e.target.dataset.id),
-      name: e.target.dataset.name
-    });
-    this.closeModal();
+    if (!e.currentTarget.classList.contains("disabled")) {
+      this.props.handleCategoryAdd({
+        id: Number(e.currentTarget.dataset.id),
+        name: e.currentTarget.dataset.name
+      });
+      this.closeModal();
+    }
   }
 
   handleCategoryRemove(e) {

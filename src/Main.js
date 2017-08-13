@@ -7,6 +7,7 @@ import Tasks from './Tasks.js'
 import Task from './Task.js'
 import LoginForm from './LoginForm.js'
 import Profile from './Profile.js'
+import ChangePassword from './ChangePassword.js'
 import Categories from './Categories.js'
 
 export default class Main extends Component {
@@ -22,7 +23,9 @@ export default class Main extends Component {
     this.handleLogout = this.handleLogout.bind(this);
   }
 
+  //FIXME: this doesn't run when clicking on a link like the 'home' link on the login page...
   requireLogin() {
+    //TODO: find a more 'react/react-router' way of doing this other than componentWillMount...
     if (!this.state.user) {
       var _self = this;
       $.ajax({
@@ -51,10 +54,10 @@ export default class Main extends Component {
   }
 
   handleLogout() {
+    this.context.router.history.push("/login");
     this.setState({
       user: null
     });
-    this.context.router.history.push("/login");
   }
 
   componentWillMount() {
@@ -75,6 +78,7 @@ export default class Main extends Component {
               <Route path="/tasks/:id" render={(props) => <Task {...props} user={this.state.user} />} />
               <Route path="/profile/new" component={Profile} />
               <Route path="/profile/" render={(props) => <Profile user={this.state.user} onUpdate={this.handleUserUpdate} />} />
+              <Route path="/change-password" render={(props) => <ChangePassword user={this.state.user} />} />
               <Route path="/skills-and-interests" component={Categories} />
             </Switch>
           </main>

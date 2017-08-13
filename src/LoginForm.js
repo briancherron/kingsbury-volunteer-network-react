@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom'
 import $ from 'jquery';
 import { Grid, FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import Feedback from './Feedback.js';
 
 export default class LoginForm extends Component {
   constructor(props) {
@@ -9,18 +10,12 @@ export default class LoginForm extends Component {
     this.state = {
       email: "",
       password: "",
-      validationState: null,
-      loggedIn: false
-
+      loggedIn: false,
+      feedback: {}
     };
-    this.getValidationState = this.getValidationState.bind(this);
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  getValidationState() {
-    return this.state.validationState;
   }
 
   handleEmailChange(e) {
@@ -42,22 +37,30 @@ export default class LoginForm extends Component {
       type: "POST",
       url: "/task-tracker/api/auth/login",
       contentType: "application/json",
-      dataType: "json",
       data: JSON.stringify({
         email: this.state.email,
         password: this.state.password
       })
     }).done(function(data) {
-      _self.setState({
-        validationState: "success"
-      });
       _self.props.onLogin(data);
       _self.setState({
-        loggedIn: true
+        loggedIn: true,
+        feedback: {}
       });
     }).fail(function(response) {
+      const feedback = {
+        dangerMessages: []
+      };
+      switch (response.status) {
+        case 404:
+          feedback.dangerMessages.push("Sorry, no account was found matching that email address and password.");
+          break;
+        default:
+          feedback.dangerMessages.push("Sorry, an unexpected error has occurred.");
+          break;
+      }
       _self.setState({
-        validationState: "error"
+        feedback: feedback
       });
     });
   }
@@ -68,10 +71,10 @@ export default class LoginForm extends Component {
     }
     return (
       <Grid>
+        <Feedback {...this.state.feedback} />
         <form onSubmit={this.handleSubmit}>
           <FormGroup
             controlId="loginEmail"
-            validationState={this.getValidationState()}
           >
             <ControlLabel>Email Address</ControlLabel>
             <FormControl
@@ -84,7 +87,6 @@ export default class LoginForm extends Component {
 
           <FormGroup
             controlId="loginPassword"
-            validationState={this.getValidationState()}
           >
             <ControlLabel>Password</ControlLabel>
             <FormControl
@@ -107,10 +109,12 @@ export default class LoginForm extends Component {
             block
             onClick={this.handleSignUpClick}
           >
-            <Link to={"/profile/new"}>Need an account? Sign Up!</Link>
+
           </Button>
         </form>
       </Grid>
     );
+    //TODO: sign up should be by invite-only
+    //<Link to={"/profile/new"}>Need an account? Sign Up!</Link>
   }
 }

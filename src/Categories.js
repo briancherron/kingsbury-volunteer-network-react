@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import { Grid, FormGroup, FormControl, Button } from 'react-bootstrap';
+import { Grid, Row, Col, FormGroup, FormControl, Button, Glyphicon, Modal } from 'react-bootstrap';
+import Feedback from './Feedback.js';
 
 export default class Categories extends Component {
 
@@ -8,7 +9,10 @@ export default class Categories extends Component {
     super(props);
     this.state = {
       newCategory: "",
-      categories: []
+      categories: [],
+      feedback: {},
+      showDeleteModal: false,
+      selectedCategoryId: ""
     }
 
     this.handleNewCategoryChange = this.handleNewCategoryChange.bind(this);
@@ -16,6 +20,8 @@ export default class Categories extends Component {
     this.handleCategoryChange = this.handleCategoryChange.bind(this);
     this.handleCategoryUpdate = this.handleCategoryUpdate.bind(this);
     this.handleCategoryDelete = this.handleCategoryDelete.bind(this);
+    this.openDeleteModal = this.openDeleteModal.bind(this);
+    this.closeDeleteModal = this.closeDeleteModal.bind(this);
   }
 
   componentDidMount() {
@@ -52,10 +58,13 @@ export default class Categories extends Component {
       const newState = Object.assign({}, _self.state);
       newState.newCategory = "";
       newState.categories.push(data);
+      newState.feedback = {};
 
       _self.setState(newState);
     }).fail(function(response) {
-      console.log(response);
+      _self.setState({
+        feedback: response.responseJSON
+      });
     });
   }
 
@@ -87,16 +96,19 @@ export default class Categories extends Component {
           item = data;
         }
       });
+      newState.feedback = {};
 
       _self.setState(newState);
     }).fail(function(response) {
-      console.log(response);
+      _self.setState({
+        feedback: response.responseJSON
+      });
     });
   }
 
   handleCategoryDelete(e) {
     var _self = this;
-    const categoryId = Number(e.target.dataset.id);
+    const categoryId = Number(this.state.selectedCategoryId);
     $.ajax({
       type: "DELETE",
       url: "/task-tracker/api/categories/" + categoryId,
@@ -105,6 +117,7 @@ export default class Categories extends Component {
     }).done(function(data) {
       const newState = Object.assign({}, _self.state);
       newState.categories = newState.categories.filter(category => category.id !== categoryId);
+      newState.showDeleteModal = false;
 
       _self.setState(newState);
     }).fail(function(response) {
@@ -112,25 +125,73 @@ export default class Categories extends Component {
     });
   }
 
+  openDeleteModal(e) {
+    this.setState({
+      showDeleteModal: true,
+      selectedCategoryId: e.target.dataset.id
+    });
+  }
+
+  closeDeleteModal() {
+    this.setState({
+      showDeleteModal: false
+    });
+  }
+
   render() {
     const categoryRows = this.state.categories.map((category) =>
-      <div key={category.id}>
-        <FormGroup>
-          <FormControl type="text" id={category.id.toString()} value={category.name} onChange={this.handleCategoryChange} />
-        </FormGroup>
-        <Button onClick={this.handleCategoryUpdate} data-id={category.id.toString()}>Save</Button>
-        <Button onClick={this.handleCategoryDelete} data-id={category.id.toString()}>Delete</Button>
-      </div>);
+      <Row key={category.id}>
+        <Col xs={8}>
+          <FormGroup>
+            <FormControl type="text" id={category.id.toString()} value={category.name} onChange={this.handleCategoryChange} />
+          </FormGroup>
+        </Col>
+        <Col xs={2}>
+          <Button onClick={this.handleCategoryUpdate} data-id={category.id.toString()} block><Glyphicon glyph="floppy-disk" /><span className="hidden-xs"> Save</span></Button>
+        </Col>
+        <Col xs={2}>
+          <Button onClick={this.openDeleteModal} data-id={category.id.toString()} block><Glyphicon glyph="trash" /><span className="hidden-xs"> Delete</span></Button>
+        </Col>
+      </Row>);
 
     return (
       <Grid>
-        <div className="form-inline">
-          <FormGroup>
-            <FormControl type="text" id="new-category" value={this.state.newCategory} onChange={this.handleNewCategoryChange} />
-          </FormGroup>
-          <Button onClick={this.handleCategoryAdd}>Add</Button>
-          {categoryRows}
-        </div>
+        <Feedback {...this.state.feedback} />
+        <h4>Add a new skill or interest</h4>
+        <Row>
+          <Col xs={8}>
+            <FormGroup>
+              <FormControl type="text" id="new-category" value={this.state.newCategory} onChange={this.handleNewCategoryChange} />
+            </FormGroup>
+          </Col>
+          <Col xs={2}>
+            <Button onClick={this.handleCategoryAdd} block><Glyphicon glyph="plus" /><span className="hidden-xs"> Add</span></Button>
+          </Col>
+        </Row>
+        <h4>Edit existing skills or interests</h4>
+        {categoryRows}
+        <Modal show={this.state.showDeleteModal} onHide={this.closeDeleteModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete skill or interest</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete this skill or interest?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              bsStyle="primary"
+              onClick={this.handleCategoryDelete}
+            >
+              <Glyphicon glyph="trash"/> Yes, delete this skill or interest
+            </Button>
+            <Button
+              bsStyle="default"
+              onClick={this.closeDeleteModal}
+            >
+              Cancel
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Grid>
     );
   }

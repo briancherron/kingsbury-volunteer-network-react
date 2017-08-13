@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import { Grid, Row, Col, FormGroup, ControlLabel, FormControl, Button, Glyphicon, ListGroup, ListGroupItem } from 'react-bootstrap';
-import CategorySelection from './CategorySelection'
+import { Grid, Row, Col, FormGroup, ControlLabel, FormControl, Button, Glyphicon, ListGroup, ListGroupItem, Modal } from 'react-bootstrap';
+import CategorySelection from './CategorySelection';
+import Feedback from './Feedback.js';
 
 export default class Home extends Component {
 
@@ -9,23 +10,26 @@ export default class Home extends Component {
     super(props);
     this.newTask = {
       name: "",
-      status: {},
+      status: {
+        id: 1,
+        name: "Not Started"
+      },
       date: "",
       description: "",
       categories: [],
-      users: [],
-      partners: []
+      users: []
     }
     this.state = {
       task: Object.assign({}, this.newTask),
       categories: [],
       users: [],
-      partners: [],
       statuses: [],
       categoriesReady: false,
       usersReady: false,
       statusesReady: false,
-      partnersReady: false
+      showInviteModal: false,
+      showDeleteModal: false,
+      feedback: {}
     };
 
     this.loadTask = this.loadTask.bind(this);
@@ -38,9 +42,13 @@ export default class Home extends Component {
     this.handleCategoryRemove = this.handleCategoryRemove.bind(this);
     this.handleUserAdd = this.handleUserAdd.bind(this);
     this.handleUserRemove = this.handleUserRemove.bind(this);
-    this.handlePartnerChange = this.handlePartnerChange.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.openInviteModal = this.openInviteModal.bind(this);
+    this.closeInviteModal = this.closeInviteModal.bind(this);
+    this.openDeleteModal = this.openDeleteModal.bind(this);
+    this.closeDeleteModal = this.closeDeleteModal.bind(this);
+    this.handleUserInvite = this.handleUserInvite.bind(this);
   }
 
   componentDidMount() {
@@ -51,9 +59,6 @@ export default class Home extends Component {
       contentType: "application/json",
       dataType: "json"
     }).done(function(data) {
-      data.forEach(function(user) {
-        user.checked = false;
-      });
       _self.setState({
         users: data,
         usersReady: true
@@ -103,8 +108,8 @@ export default class Home extends Component {
         });
         newState.task.users.forEach(function(tu) {
           newState.users.find(function(u) {
-            return tu.id === u.id;
-          }).added = true;
+            return tu.user.id === u.id;
+          }).statusId = tu.statusId;
         });
         _self.setState(newState);
       }).fail(function(response) {
@@ -196,15 +201,23 @@ export default class Home extends Component {
     const userEmail = this.props.user.email;
     const newState = Object.assign({}, this.state);
     this.setState(function(previousState) {
-      newState.task.users = previousState.task.users.concat([{
-        id: userId,
-        email: userEmail,
-        firstName: this.props.user.firstName,
-        lastName: this.props.user.lastName
-      }]);
+      const existingUser = newState.task.users.find((tu) => tu.user.id === userId);
+      if (existingUser) {
+        existingUser.statusId = 2;
+      } else {
+        newState.task.users = previousState.task.users.concat([{
+          user: {
+            id: userId,
+            email: userEmail,
+            firstName: this.props.user.firstName,
+            lastName: this.props.user.lastName
+          },
+          statusId: 2
+        }]);
+      }
       newState.users.find(function(user) {
         return user.id === userId;
-      }).added = true;
+      }).statusId = 2;
 
       return newState;
     });
@@ -214,73 +227,15 @@ export default class Home extends Component {
     const userId = this.props.user.id;
     const newState = Object.assign({}, this.state);
     this.setState(function(previousState) {
-      newState.task.users = previousState.task.users.filter(function(user) {
-          return user.id !== userId;
+      newState.task.users = previousState.task.users.filter(function(tu) {
+          return tu.user.id !== userId;
       });
       newState.users.find(function(user) {
         return user.id === userId;
-      }).added = false;
+      }).statusId = 0;
 
       return newState;
     });
-  }
-
-  handleUserChange(e) {
-    const newState = Object.assign({}, this.state);
-    const id = Number(e.target.dataset.id);
-    const email = e.target.dataset.email;
-    if (e.target.checked) {
-      this.setState(function(previousState) {
-        newState.task.users = previousState.task.users.concat([{
-          id: id,
-          email: email
-        }]);
-        newState.users.find(function(user) {
-          return user.id === id;
-        }).checked = true;
-
-        return newState;
-      });
-    } else {
-      this.setState(function(previousState) {
-        newState.task.users = previousState.task.users.filter(function(user) {
-            return user.id !== id;
-        });
-        newState.users.find(function(user) {
-          return user.id === id;
-        }).checked = false;
-
-        return newState;
-      });
-    }
-  }
-
-  handlePartnerChange(e) {
-    const task = Object.assign({}, this.state.task);
-    const id = Number(e.target.dataset.id);
-    const name = e.target.dataset.name;
-    if (e.target.checked) {
-      this.setState(function(previousState) {
-        task.partners = previousState.task.partners.concat([{
-          id: id,
-          name: name
-        }]);
-
-        return {
-          task: task
-        };
-      });
-    } else {
-      this.setState(function(previousState) {
-        task.users = previousState.task.partners.filter(function(partner) {
-            return partner.id !== id;
-        });
-
-        return {
-          task: task
-        };
-      });
-    }
   }
 
   handleSave(e) {
@@ -292,9 +247,14 @@ export default class Home extends Component {
       dataType: "json",
       data: JSON.stringify(this.state.task)
     }).done(function(data) {
+      _self.setState({
+        feedback: {}
+      });
       _self.props.history.push("/find-tasks");
     }).fail(function(response) {
-      console.log(response);
+      _self.setState({
+        feedback: response.responseJSON
+      });
     });
   }
 
@@ -312,15 +272,54 @@ export default class Home extends Component {
     });
   }
 
+  openInviteModal() {
+    this.setState({
+      showInviteModal: true
+    });
+  }
+
+  closeInviteModal() {
+    this.setState({
+      showInviteModal: false
+    });
+  }
+
+  openDeleteModal() {
+    this.setState({
+      showDeleteModal: true
+    });
+  }
+
+  closeDeleteModal() {
+    this.setState({
+      showDeleteModal: false
+    });
+  }
+
+  handleUserInvite(e) {
+    if (!e.currentTarget.classList.contains("disabled")) {
+      const newState = Object.assign({}, this.state);
+      const user = newState.users.find((user) => user.id === Number(e.currentTarget.dataset.id));
+      const taskUser = Object.assign({}, user);
+      user.statusId = 1;
+      newState.task.users.push({
+        user: taskUser,
+        statusId: 1
+      });
+      this.setState(newState);
+      this.closeInviteModal();
+    }
+  }
+
   render() {
-    var categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.task.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} />
+    const categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.task.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} />
 
     const selectedUsers = this.state.task.users.length
-      ? this.state.task.users.map((user) => <ListGroupItem key={user.id}>{user.firstName} {user.lastName}</ListGroupItem>)
+      ? this.state.task.users.map((tu) => <ListGroupItem key={tu.user.id}>{tu.user.firstName} {tu.user.lastName} <Glyphicon className="pull-right" glyph={tu.statusId === 1 ? "hourglass" : "check"} /></ListGroupItem>)
       : null;
-    const addRemoveUser = this.state.usersReady && this.state.users.find((user) => user.id === this.props.user.id).added
-      ? <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /></Button>
-      : <Button bsStyle="link" onClick={this.handleUserAdd}><Glyphicon glyph="plus" /></Button>;
+    const addRemoveUser = this.state.usersReady && this.state.users.find((user) => user.id === this.props.user.id).statusId === 2
+      ? <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /> Remove me</Button>
+      : <Button bsStyle="link" onClick={this.handleUserAdd}><Glyphicon glyph="plus" /> Add me</Button>;
     const selectedUsersList = this.state.task.users.length
       ? <ListGroup>{selectedUsers}</ListGroup>
       : <p><em>No participants</em></p>;
@@ -340,7 +339,7 @@ export default class Home extends Component {
             <Button
               bsStyle="default"
               block
-              onClick={this.handleDelete}
+              onClick={this.openDeleteModal}
             >
               <Glyphicon glyph="trash"/> Delete
             </Button>
@@ -357,9 +356,14 @@ export default class Home extends Component {
             </Button>
           </Col>
         </Row>;
+    const users = this.state.users.length
+      ? this.state.users.map((user) => user.id !== this.props.user.id ? <ListGroupItem key={user.id} data-id={user.id} onClick={this.handleUserInvite} disabled={user.statusId > 0}>{user.firstName} {user.lastName} <a className="pull-right"><Glyphicon glyph={user.statusId === 1 ? "hourglass" : user.statusId === 2 ? "check" : "plus"} /></a></ListGroupItem> : null)
+      : <p><em>No participants found</em></p>;
+    const inviteUser = <Button bsStyle="link" onClick={this.openInviteModal}><Glyphicon glyph="envelope" /> Invite a participant</Button>;
 
     return(
       <Grid>
+        <Feedback {...this.state.feedback} />
         <form>
           <Row>
             <Col xs={12} md={6}>
@@ -417,6 +421,7 @@ export default class Home extends Component {
                 <ControlLabel>
                   Participants
                   {addRemoveUser}
+                  {inviteUser}
                 </ControlLabel>
                 {selectedUsersList}
               </FormGroup>
@@ -425,6 +430,38 @@ export default class Home extends Component {
 
           {buttonRow}
         </form>
+        <Modal show={this.state.showInviteModal} onHide={this.closeInviteModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Invite a participant</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ListGroup>
+              {users}
+            </ListGroup>
+          </Modal.Body>
+        </Modal>
+        <Modal show={this.state.showDeleteModal} onHide={this.closeDeleteModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete task</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete this task?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              bsStyle="primary"
+              onClick={this.handleDelete}
+            >
+              <Glyphicon glyph="trash"/> Yes, delete this task
+            </Button>
+            <Button
+              bsStyle="default"
+              onClick={this.closeDeleteModal}
+            >
+              Cancel
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Grid>
     );
   }

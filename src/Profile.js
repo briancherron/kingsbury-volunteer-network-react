@@ -168,7 +168,7 @@ export default class Profile extends Component {
   }
 
   handleDelete(e) {
-    var _self = this;
+    const _self = this;
     $.ajax({
       type: "DELETE",
       url: "/task-tracker/api/users/" + this.state.user.id,
@@ -211,22 +211,13 @@ export default class Profile extends Component {
         </div>;
     const buttonRow = this.state.user.id
       ? <Row>
-          <Col xs={6}>
+          <Col xs={12}>
             <Button
               bsStyle="primary"
               block
               onClick={this.handleSave}
             >
               <Glyphicon glyph="floppy-disk"/> Save
-            </Button>
-          </Col>
-          <Col xs={6}>
-            <Button
-              bsStyle="default"
-              block
-              onClick={this.handleDelete}
-            >
-              <Glyphicon glyph="trash"/> Delete
             </Button>
           </Col>
         </Row>
