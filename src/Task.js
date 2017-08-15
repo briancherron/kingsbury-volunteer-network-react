@@ -15,6 +15,7 @@ export default class Home extends Component {
         name: "Not Started"
       },
       date: "",
+      dateAdded: new Date().toISOString().substring(0, 10),
       description: "",
       categories: [],
       users: []
@@ -315,7 +316,7 @@ export default class Home extends Component {
     const categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.task.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} />
 
     const selectedUsers = this.state.task.users.length
-      ? this.state.task.users.map((tu) => <ListGroupItem key={tu.user.id}>{tu.user.firstName} {tu.user.lastName} <Glyphicon className="pull-right" glyph={tu.statusId === 1 ? "hourglass" : "check"} /></ListGroupItem>)
+      ? this.state.task.users.map((tu) => <ListGroupItem key={tu.user.id}>{tu.user.firstName} {tu.user.lastName} <Glyphicon className="pull-right" glyph={tu.statusId === 1 ? "hourglass" : "check"}> <em>{tu.statusId === 1 ? 'pending' : 'participating'}</em></Glyphicon></ListGroupItem>)
       : null;
     const addRemoveUser = this.state.usersReady && this.state.users.find((user) => user.id === this.props.user.id).statusId === 2
       ? <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /> Remove me</Button>
@@ -377,9 +378,19 @@ export default class Home extends Component {
                 />
               </FormGroup>
             </Col>
-            <Col xs={12} md={3}>
+            <Col xs={12} md={2}>
               <FormGroup>
-                <ControlLabel>Date</ControlLabel>
+                <ControlLabel>Date Added</ControlLabel>
+                <FormControl
+                  type="date"
+                  readOnly
+                  value={this.state.task.dateAdded}
+                />
+              </FormGroup>
+            </Col>
+            <Col xs={12} md={2}>
+              <FormGroup>
+                <ControlLabel>Due Date</ControlLabel>
                 <FormControl
                   type="date"
                   value={this.state.task.date}
@@ -388,7 +399,7 @@ export default class Home extends Component {
                 />
               </FormGroup>
             </Col>
-            <Col xs={12} md={3}>
+            <Col xs={12} md={2}>
               <FormGroup>
                 <ControlLabel>Status</ControlLabel>
                 <FormControl

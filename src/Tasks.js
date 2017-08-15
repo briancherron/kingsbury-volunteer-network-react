@@ -25,6 +25,7 @@ export default class Tasks extends Component {
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handleCategoryChange = this.handleCategoryChange.bind(this);
     this.search = this.search.bind(this);
+    this.showTask = this.showTask.bind(this);
   }
 
   componentDidMount() {
@@ -128,6 +129,10 @@ export default class Tasks extends Component {
     });
   }
 
+  showTask(e) {
+    this.props.history.push("/tasks/" + e.currentTarget.dataset.id);
+  }
+
   render() {
     const statusOptions = this.state.statuses.map((status) => <option key={status.id} value={status.id}>{status.name}</option>);
     const statuses =
@@ -149,11 +154,11 @@ export default class Tasks extends Component {
           {participantOptions}
         </FormControl>;
     const tasks = this.state.tasks.map((task) =>
-      <tr key={task.id}>
-        <td>{task.name}</td>
-        <td>{task.date}</td>
-        <td>{task.status.name}</td>
-        <td className="text-center"><Link to={"/tasks/" + task.id}><Glyphicon glyph="edit" /></Link></td>
+      <tr key={task.id} data-id={task.id} className={task.status.id === 3 ? 'strikethrough' : ''} onClick={this.showTask}>
+        <td><div>{task.name}</div></td>
+        <td><div>{task.dateAdded}</div></td>
+        <td><div>{task.date}</div></td>
+        <td><div>{task.status.name}</div></td>
       </tr>);
 
     return (
@@ -178,9 +183,9 @@ export default class Tasks extends Component {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Date</th>
+              <th>Date Added</th>
+              <th>Due Date</th>
               <th>Status</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
