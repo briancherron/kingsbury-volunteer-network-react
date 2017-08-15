@@ -55,7 +55,7 @@ export default class Invitation extends Component {
       _self.setState({
         feedback: {}
       });
-      //TODO: done handler
+      _self.props.history.push("/");
     }).fail(function(response) {
       _self.setState({
         feedback: response.responseJSON
@@ -79,7 +79,7 @@ export default class Invitation extends Component {
           </FormGroup>
           <FormGroup>
             <ControlLabel>Email Address</ControlLabel>
-              <FormControl type="text" onChange={this.handleEmailChange} />
+              <FormControl type="email" onChange={this.handleEmailChange} />
           </FormGroup>
           <Button bsStyle="primary" block type="submit">
             <Glyphicon glyph="envelope" /> Send Invitation

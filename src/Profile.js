@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom';
 import $ from 'jquery';
 import { Grid, Row, Col, FormGroup, ControlLabel, FormControl, Checkbox, Button, Glyphicon } from 'react-bootstrap';
-import CategorySelection from './CategorySelection'
+import CategorySelection from './CategorySelection.js';
+import Feedback from './Feedback.js';
 
 export default class Profile extends Component {
 
@@ -20,7 +21,8 @@ export default class Profile extends Component {
       },
       joining: false,
       categories: [],
-      redirect: false
+      redirect: false,
+      feedback: {}
     };
 
     this.handleCategoriesLoaded = this.handleCategoriesLoaded.bind(this);
@@ -175,7 +177,9 @@ export default class Profile extends Component {
         redirect: true
       });
     }).fail(function(response) {
-      console.log(response);
+      _self.setState({
+        feedback: response.responseJSON
+      });
     });
   }
 
@@ -239,6 +243,7 @@ export default class Profile extends Component {
 
     return(
       <Grid>
+        <Feedback {...this.state.feedback} />
         <form>
           <FormGroup>
             <ControlLabel>Email</ControlLabel>

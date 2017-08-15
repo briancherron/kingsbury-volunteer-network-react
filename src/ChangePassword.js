@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom'
 import $ from 'jquery';
 import { Grid, FormGroup, ControlLabel, FormControl, Button, Glyphicon } from 'react-bootstrap';
+import Feedback from './Feedback.js';
 
 export default class ChangePassword extends Component {
 
@@ -13,7 +14,8 @@ export default class ChangePassword extends Component {
         newPassword: "",
         newPasswordConfirm: ""
       },
-      redirect: false
+      redirect: false,
+      feedback: {}
     }
 
     this.handleCurrentPasswordChange = this.handleCurrentPasswordChange.bind(this);
@@ -58,7 +60,9 @@ export default class ChangePassword extends Component {
         redirect: true
       });
     }).fail(function(response) {
-      //TODO: feedback messages
+      _self.setState({
+        feedback: response.responseJSON
+      });
     });
   }
 
@@ -69,6 +73,7 @@ export default class ChangePassword extends Component {
 
     return(
       <Grid>
+        <Feedback {...this.state.feedback} />
         <form>
           <FormGroup>
             <ControlLabel>Current Password</ControlLabel>
