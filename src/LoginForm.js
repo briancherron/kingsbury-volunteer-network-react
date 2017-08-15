@@ -53,7 +53,7 @@ export default class LoginForm extends Component {
       };
       switch (response.status) {
         case 404:
-          feedback.dangerMessages.push("Sorry, no account was found matching that email address and password.");
+          feedback.dangerMessages.push("Sorry, no account was found matching the email address and password.");
           break;
         default:
           feedback.dangerMessages.push("Sorry, an unexpected error has occurred.");

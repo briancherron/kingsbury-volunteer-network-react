@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import { Switch, Route } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom';
 import $ from 'jquery';
-import AppNav from './AppNav.js'
-import Home from './Home.js'
-import Tasks from './Tasks.js'
-import Task from './Task.js'
-import LoginForm from './LoginForm.js'
-import Profile from './Profile.js'
-import ChangePassword from './ChangePassword.js'
-import Categories from './Categories.js'
+import AppNav from './AppNav.js';
+import Home from './Home.js';
+import Tasks from './Tasks.js';
+import Task from './Task.js';
+import LoginForm from './LoginForm.js';
+import Profile from './Profile.js';
+import ChangePassword from './ChangePassword.js';
+import Categories from './Categories.js';
+import Invitation from './Invitation.js';
 
 export default class Main extends Component {
   constructor(props) {
@@ -37,8 +38,13 @@ export default class Main extends Component {
         _self.setState({
           user: data
         });
+        if (window.location.pathname.indexOf("/join/") === 0) {
+          _self.context.router.history.push("/profile");
+        }
       }).fail(function(response) {
-        _self.context.router.history.push("/login");
+        if (window.location.pathname.indexOf("/join/") !== 0) {
+          _self.context.router.history.push("/login");
+        }
       }).always(function() {
         _self.setState({
           visible: true
@@ -70,16 +76,17 @@ export default class Main extends Component {
           <main>
             <AppNav user={this.state.user} handleLogout={this.handleLogout} />
             <Switch>
-              <Route exact path="/" render={(props) => <Home user={this.state.user} />} />
+              <Route exact path="/" render={(props) => <Home user={this.state.user}  requireLogin={this.requireLogin} visible={this.state.visible} />} />
               <Route path="/login" render={(props) => <LoginForm onLogin={this.handleUserUpdate} />} />
               <Route exact path="/find-tasks" component={Tasks} />
               <Route exact path="/new-task" render={(props) => <Task {...props} user={this.state.user} />} />
               <Route exact path="/my-tasks" render={(props) => <Tasks user={this.state.user} />} />
               <Route path="/tasks/:id" render={(props) => <Task {...props} user={this.state.user} />} />
-              <Route path="/profile/new" component={Profile} />
-              <Route path="/profile/" render={(props) => <Profile user={this.state.user} onUpdate={this.handleUserUpdate} />} />
+              <Route path="/profile/" render={(props) => <Profile {...props} user={this.state.user} onUpdate={this.handleUserUpdate} />} />
               <Route path="/change-password" render={(props) => <ChangePassword user={this.state.user} />} />
               <Route path="/skills-and-interests" component={Categories} />
+              <Route path="/send-invitation/" component={Invitation} />
+              <Route path="/join/:id" render={(props) => <Profile {...props} user={this.state.user} onUpdate={this.handleUserUpdate} />} />
             </Switch>
           </main>
       );

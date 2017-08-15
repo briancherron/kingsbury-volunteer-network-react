@@ -21,7 +21,7 @@ export default class CategorySelection extends Component {
     var _self = this;
     $.ajax({
       type: "GET",
-      url: "/task-tracker/api/categories",
+      url: "/task-tracker/api/categories/",
       contentType: "application/json",
       dataType: "json"
     }).done(function(data) {

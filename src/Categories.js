@@ -28,7 +28,7 @@ export default class Categories extends Component {
     const _self = this;
     $.ajax({
       type: "GET",
-      url: "/task-tracker/api/categories",
+      url: "/task-tracker/api/categories/",
       contentType: "application/json",
       dataType: "json"
     }).done(function(data) {
@@ -48,7 +48,7 @@ export default class Categories extends Component {
     const _self = this;
     $.ajax({
       type: "POST",
-      url: "/task-tracker/api/categories",
+      url: "/task-tracker/api/categories/",
       contentType: "application/json",
       dataType: "json",
       data: JSON.stringify({
@@ -139,6 +139,9 @@ export default class Categories extends Component {
   }
 
   render() {
+    const editHeader = this.state.categories.length
+      ? <h4>Edit existing skills or interests</h4>
+      : null;
     const categoryRows = this.state.categories.map((category) =>
       <Row key={category.id}>
         <Col xs={8}>
@@ -168,7 +171,7 @@ export default class Categories extends Component {
             <Button onClick={this.handleCategoryAdd} block><Glyphicon glyph="plus" /><span className="hidden-xs"> Add</span></Button>
           </Col>
         </Row>
-        <h4>Edit existing skills or interests</h4>
+        {editHeader}
         {categoryRows}
         <Modal show={this.state.showDeleteModal} onHide={this.closeDeleteModal}>
           <Modal.Header closeButton>

@@ -79,8 +79,8 @@ export default class AppNav extends Component {
             <Link to={"/"}>
               <img src="/logo.png" alt="kingsbury country day school logo" />
               <Navbar.Text>
-                <span className="visible-xs visible-sm visible-md">KCDS Volunteer Network</span>
-                <span className="visible-lg">Kingsbury Country Day School Volunteer Network</span>
+                <span className="visible-xs visible-sm visible-md">Volunteer Network</span>
+                <span className="visible-lg">Kingsbury Community Volunteer Network</span>
               </Navbar.Text>
             </Link>
           </Navbar.Brand>

@@ -15,9 +15,10 @@ export default class Profile extends Component {
         phone: "",
         firstName: "",
         lastName: "",
-        recognitionOptIn: false,
-        categories: []
+        recognitionOptIn: true,
+        categories: [],
       },
+      joining: false,
       categories: [],
       redirect: false
     };
@@ -26,7 +27,6 @@ export default class Profile extends Component {
     this.loadUser = this.loadUser.bind(this);
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handleReEnterPasswordChange = this.handleReEnterPasswordChange.bind(this);
     this.handlePhoneChange = this.handlePhoneChange.bind(this);
     this.handleFirstNameChange = this.handleFirstNameChange.bind(this);
     this.handleLastNameChange = this.handleLastNameChange.bind(this);
@@ -65,6 +65,22 @@ export default class Profile extends Component {
       }).fail(function(response) {
         console.log(response);
       });
+    } else {
+      $.ajax({
+        type: "GET",
+        url: "/task-tracker/api/invitations/" + this.props.match.params.id,
+        dataType: "json"
+      }).done(function(data) {
+        const newState = Object.assign({}, _self.state);
+        newState.user.id = data.id;
+        newState.user.email = data.email;
+        newState.user.firstName = data.firstName;
+        newState.user.lastName = data.lastName;
+        newState.joining = true;
+        _self.setState(newState);
+      }).fail(function(response) {
+        console.log(response);
+      });
     }
   }
 
@@ -82,10 +98,6 @@ export default class Profile extends Component {
     this.setState({
       user: user
     });
-  }
-
-  handleReEnterPasswordChange(e) {
-    //TODO
   }
 
   handlePhoneChange(e) {
@@ -152,8 +164,8 @@ export default class Profile extends Component {
   handleSave(e) {
     var _self = this;
     $.ajax({
-      type: this.state.user.id ? "PUT" : "POST",
-      url: "/task-tracker/api/users/" + (this.state.user.id ? this.state.user.id : ""),
+      type: "PUT",
+      url: !_self.state.joining ? "/task-tracker/api/users/" + (this.state.user.id ? this.state.user.id : "") :  "/task-tracker/api/users/join/",
       contentType: "application/json",
       dataType: "json",
       data: JSON.stringify(this.state.user)
@@ -188,7 +200,7 @@ export default class Profile extends Component {
       return <Redirect to={"/"} />
     }
     var categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.user.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} />
-    const passwordSection = this.state.user
+    const passwordSection = !this.state.joining
       ? null
       : <div>
           <FormGroup>
@@ -200,16 +212,8 @@ export default class Profile extends Component {
               onChange={this.handlePasswordChange}
             />
           </FormGroup>
-          <FormGroup>
-            <ControlLabel>Re-enter Password</ControlLabel>
-            <FormControl
-              type="password"
-              placeholder="Enter a password"
-              onChange={this.handleReEnterPasswordChange}
-            />
-          </FormGroup>
         </div>;
-    const buttonRow = this.state.user.id
+    const buttonRow = this.state.joining
       ? <Row>
           <Col xs={12}>
             <Button
@@ -217,7 +221,7 @@ export default class Profile extends Component {
               block
               onClick={this.handleSave}
             >
-              <Glyphicon glyph="floppy-disk"/> Save
+              <Glyphicon glyph="floppy-disk"/> Join the Network
             </Button>
           </Col>
         </Row>
@@ -246,7 +250,6 @@ export default class Profile extends Component {
               onChange={this.handleEmailChange}
             />
           </FormGroup>
-          {passwordSection}
           <FormGroup>
             <ControlLabel>First Name</ControlLabel>
             <FormControl
@@ -275,9 +278,11 @@ export default class Profile extends Component {
             />
           </FormGroup>
 
-          <FormGroup>
+          {passwordSection}
+
+          {/*<FormGroup>
               <Checkbox onChange={this.handleRecognitionOptInChange} checked={this.state.user.recognitionOptIn}>Yes, I would like to be recognized for contributing to completed tasks.</Checkbox>
-          </FormGroup>
+          </FormGroup>*/}
 
           {categorySelection}
           {buttonRow}
