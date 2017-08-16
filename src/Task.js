@@ -390,7 +390,7 @@ export default class Home extends Component {
             </Col>
             <Col xs={12} md={2}>
               <FormGroup>
-                <ControlLabel>Due Date</ControlLabel>
+                <ControlLabel>Needs Completed By</ControlLabel>
                 <FormControl
                   type="date"
                   value={this.state.task.date}

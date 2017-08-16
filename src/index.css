@@ -10,9 +10,11 @@ table.table-hover td {
 
 tr.strikethrough td {
   position: relative;
+  text-decoration: line-through;
+  font-style: italic;
 }
 
-tr.strikethrough td div:before {
+/*tr.strikethrough td div:before {
   content: " ";
   position: absolute;
   top: 50%;
@@ -20,3 +22,4 @@ tr.strikethrough td div:before {
   border-bottom: 1px solid #333;
   width: 100%;
 }
+*/

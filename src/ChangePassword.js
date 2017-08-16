@@ -87,6 +87,7 @@ export default class ChangePassword extends Component {
           </FormGroup>
           <FormGroup>
             <ControlLabel>New Password</ControlLabel>
+            <span className="help-block">Passwords must be at least 8 characters long and contain at least one letter and one number.</span>
             <FormControl
               type="password"
               noValidate

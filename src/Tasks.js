@@ -184,7 +184,7 @@ export default class Tasks extends Component {
             <tr>
               <th>Name</th>
               <th>Date Added</th>
-              <th>Due Date</th>
+              <th>Needs Completed By</th>
               <th>Status</th>
             </tr>
           </thead>
