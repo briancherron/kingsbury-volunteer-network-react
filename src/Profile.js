@@ -209,7 +209,7 @@ export default class Profile extends Component {
       : <div>
           <FormGroup>
             <ControlLabel>Password</ControlLabel>
-            <span class="help-block" id="helpBlock">Passwords must be at least 8 characters long and contain at least one letter and one number.</span>
+            <span className="help-block" id="helpBlock">Passwords must be at least 8 characters long and contain at least one letter and one number.</span>
             <FormControl
               type="password"
               placeholder="Enter a password"

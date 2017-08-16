@@ -70,17 +70,17 @@ export default class CategorySelection extends Component {
       : null;
     const selectedCategoriesList = this.props.selectedCategories.length
       ? <ListGroup>{selectedCategories}</ListGroup>
-      : <p><em>No skills &amp; interests</em></p>;
+      : <p><em>No interests or skills selected</em></p>;
     const allCategories = this.props.allCategories.length
       ? this.props.allCategories.map((category) => <ListGroupItem key={category.id} data-id={category.id} data-name={category.name} onClick={this.handleCategoryAdd} disabled={category.added}>{category.name} <a className="pull-right"><Glyphicon glyph="plus" /></a></ListGroupItem>)
       : null;
 
     return <FormGroup>
-            <ControlLabel>Skills &amp; Interests <Button bsStyle="link" onClick={this.openModal}><Glyphicon glyph="plus" /></Button></ControlLabel>
+            <ControlLabel>Please indicate your interests or skills <Button bsStyle="link" onClick={this.openModal}><Glyphicon glyph="plus" /> Add an interest or skill</Button></ControlLabel>
             {selectedCategoriesList}
             <Modal show={this.state.showModal} onHide={this.closeModal}>
               <Modal.Header closeButton>
-                <Modal.Title>Add skills &amp; interests</Modal.Title>
+                <Modal.Title>Add interests or skills</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <ListGroup>

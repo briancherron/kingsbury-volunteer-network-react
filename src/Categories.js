@@ -140,7 +140,7 @@ export default class Categories extends Component {
 
   render() {
     const editHeader = this.state.categories.length
-      ? <h4>Edit existing skills or interests</h4>
+      ? <h4>Edit existing interests or skills</h4>
       : null;
     const categoryRows = this.state.categories.map((category) =>
       <Row key={category.id}>
@@ -160,7 +160,7 @@ export default class Categories extends Component {
     return (
       <Grid>
         <Feedback {...this.state.feedback} />
-        <h4>Add a new skill or interest</h4>
+        <h4>Add a new interest or skill</h4>
         <Row>
           <Col xs={8}>
             <FormGroup>
@@ -175,17 +175,17 @@ export default class Categories extends Component {
         {categoryRows}
         <Modal show={this.state.showDeleteModal} onHide={this.closeDeleteModal}>
           <Modal.Header closeButton>
-            <Modal.Title>Delete skill or interest</Modal.Title>
+            <Modal.Title>Delete interest or skill</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            Are you sure you want to delete this skill or interest?
+            Are you sure you want to delete this interest or skill?
           </Modal.Body>
           <Modal.Footer>
             <Button
               bsStyle="primary"
               onClick={this.handleCategoryDelete}
             >
-              <Glyphicon glyph="trash"/> Yes, delete this skill or interest
+              <Glyphicon glyph="trash"/> Yes, delete this interest or skill
             </Button>
             <Button
               bsStyle="default"

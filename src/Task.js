@@ -22,6 +22,8 @@ export default class Home extends Component {
     }
     this.state = {
       task: Object.assign({}, this.newTask),
+      addMe: false,
+      invitationUsers: [],
       categories: [],
       users: [],
       statuses: [],
@@ -50,6 +52,7 @@ export default class Home extends Component {
     this.openDeleteModal = this.openDeleteModal.bind(this);
     this.closeDeleteModal = this.closeDeleteModal.bind(this);
     this.handleUserInvite = this.handleUserInvite.bind(this);
+    this.sendInvitations = this.sendInvitations.bind(this);
   }
 
   componentDidMount() {
@@ -101,6 +104,7 @@ export default class Home extends Component {
         dataType: "json"
       }).done(function(data) {
         const newState = Object.assign({}, _self.state);
+        newState.addMe = false;
         newState.task = data;
         newState.task.categories.forEach(function(tc) {
           newState.categories.find(function(c) {
@@ -108,9 +112,9 @@ export default class Home extends Component {
           }).added = true;
         });
         newState.task.users.forEach(function(tu) {
-          newState.users.find(function(u) {
-            return tu.user.id === u.id;
-          }).statusId = tu.statusId;
+          newState.users = newState.users.filter(function(u) {
+            return tu.user.id !== u.id;
+          });
         });
         _self.setState(newState);
       }).fail(function(response) {
@@ -198,60 +202,101 @@ export default class Home extends Component {
   }
 
   handleUserAdd(e) {
-    const userId = this.props.user.id;
-    const userEmail = this.props.user.email;
-    const newState = Object.assign({}, this.state);
-    this.setState(function(previousState) {
-      const existingUser = newState.task.users.find((tu) => tu.user.id === userId);
-      if (existingUser) {
-        existingUser.statusId = 2;
+    const _self = this;
+    this.setState({
+      addMe: true
+    }, function() {
+      if (this.state.task.id) {
+        _self.addMe().then(function() {
+          const newState = Object.assign({}, _self.state);
+          newState.task.users.push({
+            user: _self.props.user,
+            statusId: 2
+          });
+          newState.users = newState.users.filter(function(user) {
+            return user.id !== _self.props.user.id;
+          });
+          _self.setState(newState);
+        });
       } else {
-        newState.task.users = previousState.task.users.concat([{
-          user: {
-            id: userId,
-            email: userEmail,
-            firstName: this.props.user.firstName,
-            lastName: this.props.user.lastName
-          },
+        const newState = Object.assign({}, _self.state);
+        newState.task.users.push({
+          user: _self.props.user,
           statusId: 2
-        }]);
+        });
+        newState.users = newState.users.filter(function(user) {
+          return user.id !== _self.props.user.id;
+        });
+        _self.setState(newState);
       }
-      newState.users.find(function(user) {
-        return user.id === userId;
-      }).statusId = 2;
+    });
+  }
 
-      return newState;
+  addMe() {
+    return $.ajax({
+      type: "POST",
+      url: "/task-tracker/api/tasks/" + this.state.task.id + "/add-me",
+      contentType: "application/json",
+      dataType: "json"
     });
   }
 
   handleUserRemove(e) {
-    const userId = this.props.user.id;
-    const newState = Object.assign({}, this.state);
-    this.setState(function(previousState) {
-      newState.task.users = previousState.task.users.filter(function(tu) {
-          return tu.user.id !== userId;
-      });
-      newState.users.find(function(user) {
-        return user.id === userId;
-      }).statusId = 0;
-
-      return newState;
+    const _self = this;
+    this.setState({
+      addMe: false
+    }, function() {
+      if (this.state.task.id) {
+        $.ajax({
+          type: "DELETE",
+          url: "/task-tracker/api/tasks/" + this.state.task.id + "/remove-me",
+          contentType: "application/json",
+          dataType: "json"
+        }).done(function(data) {
+          const newState = Object.assign({}, _self.state);
+          newState.task.users = newState.task.users.filter((user) => user.user.id !== _self.props.user.id);
+          newState.users.push(_self.props.user);
+          _self.setState(newState);
+        }).fail(function(response) {
+          //TODO
+        });
+      } else {
+        const newState = Object.assign({}, _self.state);
+        newState.task.users = newState.task.users.filter((user) => user.user.id !== _self.props.user.id);
+        newState.users.push(_self.props.user);
+        _self.setState(newState);
+      }
     });
   }
 
   handleSave(e) {
     var _self = this;
+    const isNewTask = !_self.state.task.id;
     $.ajax({
-      type: this.state.task.id ? "PUT" : "POST",
-      url: "/task-tracker/api/tasks/" + (this.state.task.id ? this.state.task.id : ""),
+      type: isNewTask ? "POST" : "PUT",
+      url: "/task-tracker/api/tasks/" + (isNewTask ? "" : this.state.task.id),
       contentType: "application/json",
       dataType: "json",
       data: JSON.stringify(this.state.task)
     }).done(function(data) {
+
       _self.setState({
-        feedback: {}
+        feedback: {},
+        task: data
       });
-      _self.props.history.push("/find-tasks");
+      if (isNewTask) {
+        _self.sendInvitations().then(function() {
+          if (_self.state.addMe) {
+            _self.addMe().then(function() {
+              _self.props.history.push("/find-tasks");
+            });
+          } else {
+            _self.props.history.push("/find-tasks");
+          }
+        });
+      } else {
+        _self.props.history.push("/find-tasks");
+      }
     }).fail(function(response) {
       _self.setState({
         feedback: response.responseJSON
@@ -301,14 +346,51 @@ export default class Home extends Component {
     if (!e.currentTarget.classList.contains("disabled")) {
       const newState = Object.assign({}, this.state);
       const user = newState.users.find((user) => user.id === Number(e.currentTarget.dataset.id));
-      const taskUser = Object.assign({}, user);
+      const invitationUser = Object.assign({}, user);
       user.statusId = 1;
       newState.task.users.push({
-        user: taskUser,
+        user: invitationUser,
+        statusId: 1
+      });
+      newState.invitationUsers.push({
+        user: invitationUser,
         statusId: 1
       });
       this.setState(newState);
-      this.closeInviteModal();
+    } else {
+      const invitationUser = this.state.invitationUsers.find((invitationUser) => invitationUser.user.id === Number(e.currentTarget.dataset.id));
+      if (invitationUser) {
+        const newState = Object.assign({}, this.state);
+        const user = newState.users.find((user) => user.id === Number(e.currentTarget.dataset.id));
+        user.statusId = 0;
+        newState.invitationUsers = newState.invitationUsers.filter((user) => user.user.id !== invitationUser.user.id);
+        newState.task.users = newState.task.users.filter((user) => user.user.id !== invitationUser.user.id);
+        this.setState(newState);
+      }
+    }
+  }
+
+  sendInvitations() {
+    if (this.state.task.id) {
+      const _self = this;
+      return $.ajax({
+        type: "POST",
+        url: "/task-tracker/api/tasks/" + this.state.task.id + "/send-invitations",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify(_self.state.invitationUsers)
+      }).done(function(data) {
+        const newState = Object.assign({}, _self.state);
+        newState.task.users.forEach(function(tu) {
+          newState.users = newState.users.filter(function(u) {
+            return tu.user.id !== u.id;
+          });
+        });
+        newState.invitationUsers = [];
+        _self.setState(newState);
+      }).fail(function(response) {
+
+      });
     }
   }
 
@@ -318,9 +400,9 @@ export default class Home extends Component {
     const selectedUsers = this.state.task.users.length
       ? this.state.task.users.map((tu) => <ListGroupItem key={tu.user.id}>{tu.user.firstName} {tu.user.lastName} <Glyphicon className="pull-right" glyph={tu.statusId === 1 ? "hourglass" : "check"}> <em>{tu.statusId === 1 ? 'pending' : 'participating'}</em></Glyphicon></ListGroupItem>)
       : null;
-    const addRemoveUser = this.state.usersReady && this.state.users.find((user) => user.id === this.props.user.id).statusId === 2
-      ? <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /> Remove me</Button>
-      : <Button bsStyle="link" onClick={this.handleUserAdd}><Glyphicon glyph="plus" /> Add me</Button>;
+    const addRemoveUser = this.state.usersReady && this.state.users.find((user) => user.id === this.props.user.id)
+      ? <Button bsStyle="link" onClick={this.handleUserAdd}><Glyphicon glyph="plus" /> Add me</Button>
+      : <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /> Remove me</Button>;
     const selectedUsersList = this.state.task.users.length
       ? <ListGroup>{selectedUsers}</ListGroup>
       : <p><em>No participants</em></p>;
@@ -357,9 +439,9 @@ export default class Home extends Component {
             </Button>
           </Col>
         </Row>;
-    const users = this.state.users.length
+    const users = this.state.users.length > 1
       ? this.state.users.map((user) => user.id !== this.props.user.id ? <ListGroupItem key={user.id} data-id={user.id} onClick={this.handleUserInvite} disabled={user.statusId > 0}>{user.firstName} {user.lastName} <a className="pull-right"><Glyphicon glyph={user.statusId === 1 ? "hourglass" : user.statusId === 2 ? "check" : "plus"} /></a></ListGroupItem> : null)
-      : <p><em>No participants found</em></p>;
+      : <p><em>No participants available to invite</em></p>;
     const inviteUser = <Button bsStyle="link" onClick={this.openInviteModal}><Glyphicon glyph="envelope" /> Invite a participant</Button>;
 
     return(
@@ -450,6 +532,10 @@ export default class Home extends Component {
               {users}
             </ListGroup>
           </Modal.Body>
+          <Modal.Footer>
+            {this.state.task.id ? <Button bsStyle="primary" onClick={this.sendInvitations}><Glyphicon glyph="envelope" /> Send Invitations</Button> : null}
+            <Button bsStyle="default" onClick={this.closeInviteModal}>Close</Button>
+          </Modal.Footer>
         </Modal>
         <Modal show={this.state.showDeleteModal} onHide={this.closeDeleteModal}>
           <Modal.Header closeButton>
