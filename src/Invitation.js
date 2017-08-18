@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import { Grid, Row, Col, FormGroup, FormControl, ControlLabel, Button, Glyphicon } from 'react-bootstrap';
+import { Grid, FormGroup, FormControl, ControlLabel, Button, Glyphicon } from 'react-bootstrap';
 import Feedback from './Feedback.js';
 
 export default class Invitation extends Component {

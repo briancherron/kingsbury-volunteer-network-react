@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import $ from 'jquery';
-import { Grid, Row, Col, FormGroup, ControlLabel, FormControl, Checkbox, Button, Glyphicon } from 'react-bootstrap';
+import { Grid, Row, Col, FormGroup, ControlLabel, FormControl, Button, Glyphicon } from 'react-bootstrap';
 import CategorySelection from './CategorySelection.js';
 import Feedback from './Feedback.js';
 
@@ -37,6 +37,7 @@ export default class Profile extends Component {
     this.handleCategoryRemove = this.handleCategoryRemove.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.updateCategories = this.updateCategories.bind(this);
   }
 
   handleCategoriesLoaded(categories) {
@@ -160,6 +161,18 @@ export default class Profile extends Component {
       }).added = false;
 
       return newState;
+    }, function() {
+      this.updateCategories();
+    });
+  }
+
+  updateCategories() {
+    return $.ajax({
+      type: "PUT",
+      url: "/task-tracker/api/users/" + this.state.user.id + "/interests-or-skills",
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify(this.state.user.categories)
     });
   }
 
@@ -203,7 +216,7 @@ export default class Profile extends Component {
     if (this.state.redirect) {
       return <Redirect to={"/"} />
     }
-    var categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.user.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} />
+    var categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.user.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} id={this.state.user.id} handleSave={this.updateCategories} />
     const passwordSection = !this.state.joining
       ? null
       : <div>

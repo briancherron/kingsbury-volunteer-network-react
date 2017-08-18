@@ -76,7 +76,7 @@ export default class AppNav extends Component {
       <Navbar collapseOnSelect>
         <Navbar.Header>
           <Navbar.Brand style={{ padding: '2px 10px' }}>
-            <Link to={"/"}>
+            <Link to={this.props.user ? "/" : "/login"}>
               <img src="/logo.png" alt="kingsbury country day school logo" />
               <Navbar.Text>
                 <span className="visible-xs visible-sm visible-md">Volunteer Network</span>

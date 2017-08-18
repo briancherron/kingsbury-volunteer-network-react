@@ -22,9 +22,14 @@ export default class Categories extends Component {
     this.handleCategoryDelete = this.handleCategoryDelete.bind(this);
     this.openDeleteModal = this.openDeleteModal.bind(this);
     this.closeDeleteModal = this.closeDeleteModal.bind(this);
+    this.loadCategories = this.loadCategories.bind(this);
   }
 
   componentDidMount() {
+    this.loadCategories();
+  }
+
+  loadCategories() {
     const _self = this;
     $.ajax({
       type: "GET",
@@ -55,12 +60,10 @@ export default class Categories extends Component {
         name: this.state.newCategory
       })
     }).done(function(data) {
-      const newState = Object.assign({}, _self.state);
-      newState.newCategory = "";
-      newState.categories.push(data);
-      newState.feedback = {};
-
-      _self.setState(newState);
+      _self.setState({
+        newCategory: ""
+      });
+      _self.loadCategories();
     }).fail(function(response) {
       _self.setState({
         feedback: response.responseJSON

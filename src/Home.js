@@ -4,10 +4,6 @@ import { Grid, Row, Col, Panel, Button, Glyphicon } from 'react-bootstrap';
 
 export default class Home extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   componentWillMount() {
     this.props.requireLogin();
   }

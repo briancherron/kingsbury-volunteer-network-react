@@ -15,6 +15,7 @@ export default class CategorySelection extends Component {
     this.closeModal = this.closeModal.bind(this);
     this.handleCategoryAdd = this.handleCategoryAdd.bind(this);
     this.handleCategoryRemove = this.handleCategoryRemove.bind(this);
+    this.handleSave = this.handleSave.bind(this);
   }
 
   componentWillMount() {
@@ -42,16 +43,19 @@ export default class CategorySelection extends Component {
     this.setState({
       showModal: false
     });
+
+  }
+
+  handleSave() {
+    this.props.handleSave();
+    this.closeModal();
   }
 
   handleCategoryAdd(e) {
-    if (!e.currentTarget.classList.contains("disabled")) {
-      this.props.handleCategoryAdd({
-        id: Number(e.currentTarget.dataset.id),
-        name: e.currentTarget.dataset.name
-      });
-      this.closeModal();
-    }
+    this.props.handleCategoryAdd({
+      id: Number(e.currentTarget.dataset.id),
+      name: e.currentTarget.dataset.name
+    });
   }
 
   handleCategoryRemove(e) {
@@ -72,7 +76,7 @@ export default class CategorySelection extends Component {
       ? <ListGroup>{selectedCategories}</ListGroup>
       : <p><em>No interests or skills selected</em></p>;
     const allCategories = this.props.allCategories.length
-      ? this.props.allCategories.map((category) => <ListGroupItem key={category.id} data-id={category.id} data-name={category.name} onClick={this.handleCategoryAdd} disabled={category.added}>{category.name} <a className="pull-right"><Glyphicon glyph="plus" /></a></ListGroupItem>)
+      ? this.props.allCategories.map((category) => <ListGroupItem key={category.id} disabled={category.added} data-id={category.id} data-name={category.name} onClick={this.handleCategoryAdd}>{category.name} <a className="pull-right"><Glyphicon glyph={category.added ? "trash" : "plus"} /></a></ListGroupItem>)
       : null;
 
     return <FormGroup>
@@ -80,13 +84,17 @@ export default class CategorySelection extends Component {
             {selectedCategoriesList}
             <Modal show={this.state.showModal} onHide={this.closeModal}>
               <Modal.Header closeButton>
-                <Modal.Title>Add interests or skills</Modal.Title>
+                <Modal.Title>Update interests or skills</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <ListGroup>
                   {allCategories}
                 </ListGroup>
               </Modal.Body>
+              <Modal.Footer>
+                {this.props.id ? <Button bsStyle="primary" onClick={this.handleSave}><Glyphicon glyph="floppy-disk" /> Update Interests or Skills</Button> : null}
+                <Button bsStyle="default" onClick={this.closeModal}>Close</Button>
+              </Modal.Footer>
             </Modal>
           </FormGroup>;
   }

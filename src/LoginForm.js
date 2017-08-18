@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import $ from 'jquery';
 import { Grid, FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
 import Feedback from './Feedback.js';
