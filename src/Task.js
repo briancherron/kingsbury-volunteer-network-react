@@ -141,7 +141,7 @@ export default class Home extends Component {
         contentType: "application/json",
         dataType: "json"
       }).done(function(data) {
-        data.date = new Date(data.date).toISOString().substring(0, 10);
+        data.date = data.date ? new Date(data.date).toISOString().substring(0, 10) : "";
         data.dateAdded = new Date(data.dateAdded).toISOString().substring(0, 10);
         const newState = Object.assign({}, _self.state);
         newState.addMe = false;
