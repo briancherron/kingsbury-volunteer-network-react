@@ -160,7 +160,12 @@ export default class Tasks extends Component {
   }
 
   formatDate(date) {
-    return date !== null ? new Date(date).toLocaleDateString() : null;
+    if (date === null) {
+      return "";
+    }
+
+    const d = new Date(date);
+    return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
   }
 
   render() {
