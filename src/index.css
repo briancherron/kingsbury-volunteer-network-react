@@ -10,10 +10,6 @@ body {
   font-family: sans-serif;
 }
 
-.loading-shield {
-  text-align: center;
-}
-
 .loading-shield .shield {
   position: absolute;
   width: 100%;
@@ -25,7 +21,9 @@ body {
 
 .loading-shield .spinner {
   position: absolute;
-  top: 200px;
+  top: 48%;
+  left: 48%;
+  z-index: 10001;
   font-size: 4em;
   color: #E0230E;
   animation: spinner 1s linear infinite;
