@@ -1,11 +1,29 @@
 import React, { Component } from 'react';
+import $ from 'jquery';
 import { Link } from 'react-router-dom'
 import { Grid, Row, Col, Panel, Button, Glyphicon } from 'react-bootstrap';
 
 export default class Home extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      introduction: ""
+    }
+  }
+
   componentWillMount() {
     this.props.requireLogin();
+
+    const _self = this;
+    $.ajax({
+      type: "GET",
+      url: "/task-tracker/api/introduction"
+    }).done(function(data) {
+      _self.setState({
+        introduction: data
+      });
+    });
   }
 
   render() {
@@ -13,7 +31,8 @@ export default class Home extends Component {
       return(
         <div>
           <Grid>
-            <h4>Welcome to the Kingsbury Community Volunteer Network.</h4>
+            <h4>Welcome to the Kingsbury Community Volunteer Network!</h4>
+            <p className="intro-text">{this.state.introduction}</p>
             <Row>
               <Col xs={12} sm={6} lg={3}>
                 <Panel>

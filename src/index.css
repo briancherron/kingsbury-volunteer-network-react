@@ -25,12 +25,16 @@ body {
   left: 48%;
   z-index: 10001;
   font-size: 4em;
-  color: #E0230E;
-  animation: spinner 1s linear infinite;
+  color: #333333;
+  /*animation: spinner 1s linear infinite;*/
 }
 
-@keyframes spinner {
+/*@keyframes spinner {
   to {transform: rotate(360deg);}
+}*/
+
+.intro-text {
+  margin: 2em 0;
 }
 
 table.table-hover td {

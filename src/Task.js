@@ -40,7 +40,8 @@ export default class Home extends Component {
       invitationMessage: "",
       audiences: [],
       audiencesReady: false,
-      newComment: {}
+      newComment: {},
+      taskReady: false
     };
 
     this.loadTask = this.loadTask.bind(this);
@@ -161,6 +162,7 @@ export default class Home extends Component {
           taskId: data.id,
           text: ""
         }
+        newState.taskReady = true;
         _self.setState(newState);
       }).fail(function(response) {
         console.log(response);
@@ -311,6 +313,9 @@ export default class Home extends Component {
       if (this.state.task.id) {
         _self.addMe().then(function() {
           const newState = Object.assign({}, _self.state);
+          newState.task.users = newState.task.users.filter(function(user) {
+            return user.user.id !== _self.props.user.id;
+          });
           newState.task.users.push({
             user: _self.props.user,
             statusId: 2
@@ -322,6 +327,9 @@ export default class Home extends Component {
         });
       } else {
         const newState = Object.assign({}, _self.state);
+        newState.task.users = newState.task.users.filter(function(user) {
+          return user.user.id !== _self.props.user.id;
+        })
         newState.task.users.push({
           user: _self.props.user,
           statusId: 2
@@ -570,14 +578,14 @@ export default class Home extends Component {
   }
 
   render() {
-    const categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.task.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} handleSave={this.updateCategories} id={this.state.task.id} />
+    const categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.task.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} handleSave={this.updateCategories} id={this.state.task.id} header="Relevant interests or skills"/>
 
     const selectedUsers = this.state.task.users.length
-      ? this.state.task.users.map((tu) => <ListGroupItem key={tu.user.id}>{tu.user.firstName} {tu.user.lastName} <Glyphicon className="pull-right" glyph={tu.statusId === 1 ? "hourglass" : "check"}> <em>{tu.statusId === 1 ? 'pending' : 'participating'}</em></Glyphicon></ListGroupItem>)
+      ? this.state.task.users.map((tu) => <ListGroupItem key={tu.user.id}>{tu.user.lastName}, {tu.user.firstName} <Glyphicon className="pull-right" glyph={tu.statusId === 1 ? "hourglass" : "check"}> <em>{tu.statusId === 1 ? 'pending' : 'participating'}</em></Glyphicon></ListGroupItem>)
       : null;
-    const addRemoveUser = this.state.usersReady && this.state.users.find((user) => user.id === this.props.user.id)
-      ? <Button bsStyle="link" onClick={this.handleUserAdd}><Glyphicon glyph="plus" /> Add me</Button>
-      : <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /> Remove me</Button>;
+    const addRemoveUser = this.state.usersReady && this.state.taskReady && this.state.task.users.find((user) => (user.user.id === this.props.user.id && user.statusId === 2))
+      ? <Button bsStyle="link" onClick={this.handleUserRemove}><Glyphicon glyph="trash" /> Remove me</Button>
+      : <Button bsStyle="link" onClick={this.handleUserAdd}><Glyphicon glyph="plus" /> Add me</Button>;
     const selectedUsersList = this.state.task.users.length
       ? <ListGroup>{selectedUsers}</ListGroup>
       : <p><em>No participants</em></p>;
@@ -614,9 +622,9 @@ export default class Home extends Component {
             </Button>
           </Col>
         </Row>;
-    const users = this.state.users.length > 1
+    const users = this.state.users.length > 0
       ? this.state.users.map((user) => user.id !== this.props.user.id && (user.admin || this.state.task.audience.id !== 1)
-        ? <ListGroupItem key={user.id} data-id={user.id} onClick={this.handleUserInvite} disabled={user.statusId > 0}>{user.firstName} {user.lastName} <a className="pull-right"><Glyphicon glyph={user.statusId === 1 ? "hourglass" : user.statusId === 2 ? "check" : "plus"} /></a></ListGroupItem>
+        ? <ListGroupItem key={user.id} data-id={user.id} onClick={this.handleUserInvite} disabled={user.statusId > 0}>{user.lastName}, {user.firstName} <a className="pull-right"><Glyphicon glyph={user.statusId === 1 ? "hourglass" : user.statusId === 2 ? "check" : "plus"} /></a></ListGroupItem>
         : null)
       : <p><em>No participants available to invite</em></p>;
     const inviteUser = <Button bsStyle="link" onClick={this.openInviteModal}><Glyphicon glyph="envelope" /> Invite a participant</Button>;

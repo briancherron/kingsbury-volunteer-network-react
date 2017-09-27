@@ -29,7 +29,17 @@ export default class AppNav extends Component {
     const username = this.props.user ? this.props.user.firstName : null;
     let toggle = null;
     let navigation = null;
+    let introductionMenuItem = null;
+    let introductionMenuItemSm = null;
     if (this.props.user) {
+      if (this.props.user.authorizedToChangeIntroduction) {
+        introductionMenuItem = <LinkContainer to={"/introduction"}>
+            <MenuItem><Glyphicon glyph="edit" /> Change Introduction</MenuItem>
+          </LinkContainer>;
+        introductionMenuItemSm = <LinkContainer to={"/introduction"} className="visible-xs">
+            <NavItem><Glyphicon glyph="edit" /><span className="hidden-sm"> Change Introduction</span></NavItem>
+          </LinkContainer>;
+      }
       toggle = <Navbar.Toggle />;
       navigation =
         <Navbar.Collapse>
@@ -55,6 +65,7 @@ export default class AppNav extends Component {
               <LinkContainer to={"/change-password"}>
                 <MenuItem><Glyphicon glyph="lock" /> Change Password</MenuItem>
               </LinkContainer>
+              {introductionMenuItem}
               <MenuItem onClick={this.logout}><Glyphicon glyph="log-out" /> Log out</MenuItem>
             </NavDropdown>
             <NavItem><hr className="visible-xs" /></NavItem>
@@ -64,6 +75,7 @@ export default class AppNav extends Component {
             <LinkContainer to={"/change-password"} className="visible-xs">
               <NavItem><Glyphicon glyph="lock" /><span className="hidden-sm"> Change Password</span></NavItem>
             </LinkContainer>
+            {introductionMenuItemSm}
             <NavItem onClick={this.logout} className="visible-xs"><Glyphicon glyph="log-out" /><span className="hidden-sm"> Log out</span></NavItem>
           </Nav>
         </Navbar.Collapse>;

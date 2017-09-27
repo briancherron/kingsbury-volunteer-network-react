@@ -11,6 +11,7 @@ import Profile from './Profile.js';
 import ChangePassword from './ChangePassword.js';
 import Categories from './Categories.js';
 import Invitation from './Invitation.js';
+import Introduction from './Introduction.js';
 
 export default class Main extends Component {
   constructor(props) {
@@ -97,7 +98,7 @@ export default class Main extends Component {
     if(this.state.visible) {
         return(
           <main>
-            <div className="loading-shield"><div className="shield"></div><div className="spinner glyphicon glyphicon-refresh"></div></div>
+            <div className="loading-shield"><div className="shield"></div><div className="spinner glyphicon glyphicon-hourglass"></div></div>
             <AppNav user={this.state.user} handleLogout={this.handleLogout} />
             <Switch>
               <Route exact path="/" render={(props) => <Home user={this.state.user}  requireLogin={this.requireLogin} visible={this.state.visible} />} />
@@ -111,6 +112,7 @@ export default class Main extends Component {
               <Route path="/skills-and-interests" component={Categories} />
               <Route path="/send-invitation/" component={Invitation} />
               <Route path="/join/:id" render={(props) => <Profile {...props} user={this.state.user} onUpdate={this.handleUserUpdate} />} />
+              <Route path="/introduction" render={(props) => <Introduction {...props} user={this.state.user} />} />
             </Switch>
             <footer className="footer">
               <div className="container">

@@ -80,7 +80,7 @@ export default class CategorySelection extends Component {
       : null;
 
     return <FormGroup>
-            <ControlLabel>Please indicate your interests or skills <Button bsStyle="link" onClick={this.openModal}><Glyphicon glyph="plus" /> Add an interest or skill</Button></ControlLabel>
+            <ControlLabel>{this.props.header} <Button bsStyle="link" onClick={this.openModal}><Glyphicon glyph="plus" /> Add an interest or skill</Button></ControlLabel>
             {selectedCategoriesList}
             <Modal show={this.state.showModal} onHide={this.closeModal}>
               <Modal.Header closeButton>

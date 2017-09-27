@@ -216,7 +216,7 @@ export default class Profile extends Component {
     if (this.state.redirect) {
       return <Redirect to={"/"} />
     }
-    var categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.user.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} id={this.state.user.id} handleSave={this.updateCategories} />
+    var categorySelection = <CategorySelection ready={this.handleCategoriesLoaded} allCategories={this.state.categories} selectedCategories={this.state.user.categories} handleCategoryAdd={this.handleCategoryAdd} handleCategoryRemove={this.handleCategoryRemove} id={this.state.user.id} handleSave={this.updateCategories} header="Please indicate your interests or skills"/>
     const passwordSection = !this.state.joining
       ? null
       : <div>
