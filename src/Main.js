@@ -12,6 +12,8 @@ import ChangePassword from './ChangePassword.js';
 import Categories from './Categories.js';
 import Invitation from './Invitation.js';
 import Introduction from './Introduction.js';
+import ForgotPassword from './ForgotPassword.js';
+import ResetPassword from './ResetPassword.js';
 
 export default class Main extends Component {
   constructor(props) {
@@ -28,7 +30,9 @@ export default class Main extends Component {
     const _self = this;
     $(document).ajaxError(function(event, response) {
       if (response.status === 401 || response.status === 403) {
-        if (window.location.pathname.indexOf("/join/") !== 0) {
+        if (window.location.pathname.indexOf("/join") !== 0
+          && window.location.pathname.indexOf("/forgot-password") !== 0
+          && window.location.pathname.indexOf("/reset-password") !== 0) {
           _self.setState({
             user: null
           });
@@ -113,6 +117,8 @@ export default class Main extends Component {
               <Route path="/send-invitation/" component={Invitation} />
               <Route path="/join/:id" render={(props) => <Profile {...props} user={this.state.user} onUpdate={this.handleUserUpdate} />} />
               <Route path="/introduction" render={(props) => <Introduction {...props} user={this.state.user} />} />
+              <Route path="/forgot-password" component={ForgotPassword} />
+              <Route path="/reset-password" component={ResetPassword} />
             </Switch>
             <footer className="footer">
               <div className="container">
