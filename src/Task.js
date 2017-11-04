@@ -168,9 +168,12 @@ export default class Home extends Component {
         console.log(response);
       });
     } else {
-      this.setState({
-        task: Object.assign({}, this.newTask)
+      const newState = Object.assign({}, this.state);
+      newState.categories.forEach(function(c) {
+        c.added = false;
       });
+      newState.task = Object.assign({}, this.newTask);
+      this.setState(newState);
     }
   }
 
